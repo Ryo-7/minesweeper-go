@@ -14,8 +14,15 @@ type state struct {
 
 func main() {
 	var matrixSize int
-	fmt.Println("マインスイーパーの盤面サイズを指定してください(n四方になります)")
-	fmt.Scan(&matrixSize)
+	for {
+		fmt.Println("マインスイーパーの盤面サイズを指定してください(n四方になります)")
+		fmt.Scan(&matrixSize)
+		if matrixSize > 0 {
+			break
+		} else {
+			fmt.Println("0以上の数値を指定してください")
+		}
+	}
 	board := make([][]state, matrixSize)
 	for i := range board {
 		board[i] = make([]state, matrixSize)
@@ -23,8 +30,17 @@ func main() {
 	closedCellNum := matrixSize * matrixSize
 
 	var bombNum int
-	fmt.Println("ボムの数を指定してください")
-	fmt.Scan(&bombNum)
+
+	for {
+		fmt.Println("ボムの数を指定してください")
+		fmt.Scan(&bombNum)
+		if bombNum > 0 && bombNum < closedCellNum {
+			break
+		} else {
+			fmt.Printf("0以上の%d未満の数値を指定してください\n", closedCellNum)
+
+		}
+	}
 	i := 0
 	for i < bombNum {
 		x := rand.Intn(matrixSize)
@@ -70,8 +86,17 @@ func main() {
 			fmt.Println("game clear")
 			break
 		}
-		fmt.Println("空白区切りで開けたい座標をx yの順で指定してください")
-		fmt.Scan(&x, &y)
+		for {
+			fmt.Println("空白区切りで開けたい座標をx yの順で指定してください")
+			fmt.Scan(&x, &y)
+			if 0 > x || x >= matrixSize {
+				fmt.Printf("x座標は0以上%d未満で指定してください\n", matrixSize)
+			} else if 0 > y || y >= matrixSize {
+				fmt.Printf("y座標は0以上%d未満で指定してください\n", matrixSize)
+			} else {
+				break
+			}
+		}
 		if board[x][y].bomb {
 			fmt.Println("game over")
 			break
