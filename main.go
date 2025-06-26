@@ -67,13 +67,22 @@ func setBomb(gameBoard [][]state, boardSize int, bombNum, playerSelectX, playerS
 // 盤面を表示する関数
 //
 // すでに開かれているところはその周辺にある爆弾の数を表示する
-func printGameBoard(board [][]state) {
+func printGameBoard(board [][]state, finished bool) {
 	for i := 0; i < len(board); i++ {
 		for j := 0; j < len(board[i]); j++ {
-			if board[i][j].opend {
-				fmt.Print(strconv.Itoa(board[i][j].aroundBomb) + " ")
+			if finished {
+				if board[i][j].bomb {
+					fmt.Print("B ")
+				} else {
+					fmt.Print(strconv.Itoa(board[i][j].aroundBomb) + " ")
+				}
+
 			} else {
-				fmt.Print("x ")
+				if board[i][j].opend {
+					fmt.Print(strconv.Itoa(board[i][j].aroundBomb) + " ")
+				} else {
+					fmt.Print("x ")
+				}
 			}
 		}
 		fmt.Println("")
@@ -124,12 +133,13 @@ func main() {
 
 	for {
 		if board[x][y].bomb {
+			printGameBoard(board, true)
 			fmt.Println("game over")
 			break
 		}
 		board[x][y].opend = true
 		closedCellNum--
-		printGameBoard(board)
+		printGameBoard(board, false)
 		if closedCellNum == bombNum {
 			fmt.Println("game clear")
 			break
