@@ -20,6 +20,7 @@ func main() {
 	for i := range board {
 		board[i] = make([]state, matrixSize)
 	}
+	closedCellNum := matrixSize * matrixSize
 
 	var bombNum int
 	fmt.Println("ボムの数を指定してください")
@@ -65,6 +66,10 @@ func main() {
 			}
 			fmt.Println("")
 		}
+		if closedCellNum == bombNum {
+			fmt.Println("game clear")
+			break
+		}
 		fmt.Println("空白区切りで開けたい座標をx yの順で指定してください")
 		fmt.Scan(&x, &y)
 		if board[x][y].bomb {
@@ -72,5 +77,6 @@ func main() {
 			break
 		}
 		board[x][y].opend = true
+		closedCellNum--
 	}
 }
