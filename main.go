@@ -12,8 +12,75 @@ type state struct {
 	aroundBomb int
 }
 
+// ゲームの初期化処理
+func initGame(boardSize int, bombNum int) [][]state {
+	board := createGameBoard(boardSize)
+	setBomb(board, boardSize, bombNum)
+	return board
+}
+
+// 盤面作成
+func createGameBoard(boardSize int) [][]state {
+	board := make([][]state, boardSize)
+	for i := range board {
+		board[i] = make([]state, boardSize)
+	}
+	return board
+}
+
+// 爆弾を盤面にセット
+func setBomb(gameBoard [][]state, boardSize int, bombNum int) {
+	i := 0
+	for i < bombNum {
+		x := rand.Intn(boardSize)
+		y := rand.Intn(boardSize)
+		if !gameBoard[x][y].bomb {
+			gameBoard[x][y].bomb = true
+			for j := -1; j < 2; j++ {
+				if x == 0 && j == -1 {
+					continue
+				}
+				if x == boardSize-1 && j == 1 {
+					continue
+				}
+				for k := -1; k < 2; k++ {
+					if j == 0 && k == 0 {
+						continue
+					}
+					if y == 0 && k == -1 {
+						continue
+					}
+					if y == boardSize-1 && k == 1 {
+						continue
+					}
+					gameBoard[x+j][y+k].aroundBomb++
+				}
+			}
+			i++
+		}
+	}
+}
+
+// 盤面を表示する関数
+//
+// すでに開かれているところはその周辺にある爆弾の数を表示する
+func printGameBoard(board [][]state) {
+	for i := 0; i < len(board); i++ {
+		for j := 0; j < len(board[i]); j++ {
+			if board[i][j].opend {
+				fmt.Print(strconv.Itoa(board[i][j].aroundBomb) + " ")
+			} else {
+				fmt.Print("x ")
+			}
+		}
+		fmt.Println("")
+	}
+}
+
 func main() {
 	var matrixSize int
+	var bombNum int
+
 	for {
 		fmt.Println("マインスイーパーの盤面サイズを指定してください(n四方になります)")
 		fmt.Scan(&matrixSize)
@@ -23,13 +90,8 @@ func main() {
 			fmt.Println("0以上の数値を指定してください")
 		}
 	}
-	board := make([][]state, matrixSize)
-	for i := range board {
-		board[i] = make([]state, matrixSize)
-	}
-	closedCellNum := matrixSize * matrixSize
 
-	var bombNum int
+	closedCellNum := matrixSize * matrixSize
 
 	for {
 		fmt.Println("ボムの数を指定してください")
@@ -41,47 +103,12 @@ func main() {
 
 		}
 	}
-	i := 0
-	for i < bombNum {
-		x := rand.Intn(matrixSize)
-		y := rand.Intn(matrixSize)
-		if !board[x][y].bomb {
-			board[x][y].bomb = true
-			for j := -1; j < 2; j++ {
-				if x == 0 && j == -1 {
-					continue
-				}
-				if x == matrixSize-1 && j == 1 {
-					continue
-				}
-				for k := -1; k < 2; k++ {
-					if j == 0 && k == 0 {
-						continue
-					}
-					if y == 0 && k == -1 {
-						continue
-					}
-					if y == matrixSize-1 && k == 1 {
-						continue
-					}
-					board[x+j][y+k].aroundBomb++
-				}
-			}
-			i++
-		}
-	}
+
+	board := initGame(matrixSize, bombNum)
+
 	for {
 		var x, y int
-		for i := 0; i < len(board); i++ {
-			for j := 0; j < len(board[i]); j++ {
-				if board[i][j].opend {
-					fmt.Print(strconv.Itoa(board[i][j].aroundBomb) + " ")
-				} else {
-					fmt.Print("x ")
-				}
-			}
-			fmt.Println("")
-		}
+		printGameBoard(board)
 		if closedCellNum == bombNum {
 			fmt.Println("game clear")
 			break
