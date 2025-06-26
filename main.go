@@ -13,9 +13,9 @@ type state struct {
 }
 
 // ゲームの初期化処理
-func initGame(boardSize int, bombNum int) [][]state {
+func initGame(boardSize, bombNum, x, y int) [][]state {
 	board := createGameBoard(boardSize)
-	setBomb(board, boardSize, bombNum)
+	setBomb(board, boardSize, bombNum, x, y)
 	return board
 }
 
@@ -29,11 +29,14 @@ func createGameBoard(boardSize int) [][]state {
 }
 
 // 爆弾を盤面にセット
-func setBomb(gameBoard [][]state, boardSize int, bombNum int) {
+func setBomb(gameBoard [][]state, boardSize int, bombNum, playerSelectX, playerSelectY int) {
 	i := 0
 	for i < bombNum {
 		x := rand.Intn(boardSize)
 		y := rand.Intn(boardSize)
+		if playerSelectX == x && playerSelectY == y {
+			continue
+		}
 		if !gameBoard[x][y].bomb {
 			gameBoard[x][y].bomb = true
 			for j := -1; j < 2; j++ {
@@ -80,6 +83,7 @@ func printGameBoard(board [][]state) {
 func main() {
 	var matrixSize int
 	var bombNum int
+	var x, y int
 
 	for {
 		fmt.Println("マインスイーパーの盤面サイズを指定してください(n四方になります)")
@@ -104,10 +108,27 @@ func main() {
 		}
 	}
 
-	board := initGame(matrixSize, bombNum)
+	for {
+		fmt.Println("空白区切りで開けたい座標をx yの順で指定してください")
+		fmt.Scan(&x, &y)
+		if 0 > x || x >= matrixSize {
+			fmt.Printf("x座標は0以上%d未満で指定してください\n", matrixSize)
+		} else if 0 > y || y >= matrixSize {
+			fmt.Printf("y座標は0以上%d未満で指定してください\n", matrixSize)
+		} else {
+			break
+		}
+	}
+
+	board := initGame(matrixSize, bombNum, x, y)
 
 	for {
-		var x, y int
+		if board[x][y].bomb {
+			fmt.Println("game over")
+			break
+		}
+		board[x][y].opend = true
+		closedCellNum--
 		printGameBoard(board)
 		if closedCellNum == bombNum {
 			fmt.Println("game clear")
@@ -124,11 +145,5 @@ func main() {
 				break
 			}
 		}
-		if board[x][y].bomb {
-			fmt.Println("game over")
-			break
-		}
-		board[x][y].opend = true
-		closedCellNum--
 	}
 }
