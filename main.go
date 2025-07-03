@@ -89,6 +89,84 @@ func printGameBoard(board [][]state, finished bool) {
 	}
 }
 
+// 開けたところが0だった場合、連鎖的に開ける
+func chainOpen(board *[][]state, x int, y int) int {
+	openCells := 0
+	if x > 0 && y > 0 {
+		if !(*board)[x-1][y-1].opend {
+			(*board)[x-1][y-1].opend = true
+			openCells++
+			if (*board)[x-1][y-1].aroundBomb == 0 {
+				openCells += chainOpen(board, x-1, y-1)
+			}
+		}
+	}
+	if x < len(*board)-1 && y < len(*board)-1 {
+		if !(*board)[x+1][y+1].opend {
+			(*board)[x+1][y+1].opend = true
+			openCells++
+			if (*board)[x+1][y+1].aroundBomb == 0 {
+				openCells += chainOpen(board, x+1, y+1)
+			}
+		}
+	}
+	if x > 0 && y < len(*board)-1 {
+		if !(*board)[x-1][y+1].opend {
+			(*board)[x-1][y+1].opend = true
+			openCells++
+			if (*board)[x-1][y+1].aroundBomb == 0 {
+				openCells += chainOpen(board, x-1, y+1)
+			}
+		}
+	}
+	if x < len(*board)-1 && y > 0 {
+		if !(*board)[x+1][y-1].opend {
+			(*board)[x+1][y-1].opend = true
+			openCells++
+			if (*board)[x+1][y-1].aroundBomb == 0 {
+				openCells += chainOpen(board, x+1, y-1)
+			}
+		}
+	}
+	if x > 0 {
+		if !(*board)[x-1][y].opend {
+			(*board)[x-1][y].opend = true
+			openCells++
+			if (*board)[x-1][y].aroundBomb == 0 {
+				openCells += chainOpen(board, x-1, y)
+			}
+		}
+	}
+	if x < len(*board)-1 {
+		if !(*board)[x+1][y].opend {
+			(*board)[x+1][y].opend = true
+			openCells++
+			if (*board)[x+1][y].aroundBomb == 0 {
+				openCells += chainOpen(board, x+1, y)
+			}
+		}
+	}
+	if y > 0 {
+		if !(*board)[x][y-1].opend {
+			(*board)[x][y-1].opend = true
+			openCells++
+			if (*board)[x][y-1].aroundBomb == 0 {
+				openCells += chainOpen(board, x, y-1)
+			}
+		}
+	}
+	if y < len(*board)-1 {
+		if !(*board)[x][y+1].opend {
+			(*board)[x][y+1].opend = true
+			openCells++
+			if (*board)[x][y+1].aroundBomb == 0 {
+				openCells += chainOpen(board, x, y+1)
+			}
+		}
+	}
+	return openCells
+}
+
 func main() {
 	var matrixSize int
 	var bombNum int
@@ -137,8 +215,28 @@ func main() {
 			fmt.Println("game over")
 			break
 		}
+		if board[x][y].opend {
+			fmt.Println("すでに開いています。")
+			for {
+				fmt.Println("空白区切りで開けたい座標をx yの順で指定してください")
+				fmt.Scan(&x, &y)
+				if 0 > x || x >= matrixSize {
+					fmt.Printf("x座標は0以上%d未満で指定してください\n", matrixSize)
+				} else if 0 > y || y >= matrixSize {
+					fmt.Printf("y座標は0以上%d未満で指定してください\n", matrixSize)
+				} else {
+					break
+				}
+			}
+			continue
+		}
 		board[x][y].opend = true
 		closedCellNum--
+		openCells := 0
+		if board[x][y].aroundBomb == 0 {
+			openCells = chainOpen(&board, x, y)
+		}
+		closedCellNum -= openCells
 		printGameBoard(board, false)
 		if closedCellNum == bombNum {
 			fmt.Println("game clear")
